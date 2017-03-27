@@ -1,6 +1,3 @@
-this is a test program
-one instruction per line
-it could be a A-instruction
-or a C-instruction who knows
-in any case, I gotta parse it
-thanks for being here.
+D;JGT
+M=1
+@HELLLO
