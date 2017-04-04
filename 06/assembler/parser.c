@@ -33,6 +33,7 @@ cmd_type commandType(char cmd[]) {
     } else if(cmd[0] == '(') {
         return L_COMMAND;
     }
+
     return C_COMMAND;
 }
 
@@ -100,19 +101,56 @@ void jump(Parser* parser) {
     }
 }
 
+// TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
 int advance(Parser * parser) {
-    int i = 0, c;
+    int i = 0, j = 0, c = getc(parser -> program);
+    char next_line[MAX_LENGTH];
 
-    while((c = getc(parser -> program)) != '\n') {
-        if (c == EOF) {
+    // get line
+    do {
+        if(c == EOF) {
             parser -> ended = 1;
+            i++;
             break;
         }
-        parser -> currentCmd[i] = c;
+
+        next_line[i] = c;
         i++;
+        c = getc(parser -> program)
+    } while(c != '\n')
+
+
+    for(;j < i, j++) {
+        if(j != 0) {
+            // check for comment not at beginning of line
+            if(next_line[j] == '/' && next_line[j + 1] == '/') {
+                next_line[j] = '\0';
+                break;
+            }
+        } else {
+            // check for empty lines or comment at beginning of line
+            if(next_line[j] == '\n' || (next_line[j] == '/' && next_line[j + 1] == '/')) {
+                advance(parser)
+                break;
+            }
+        }
+
+        // add null char to set end of string
+        if(j == i - 1) {
+            next_line[j + 1] = '\0';
+        }
     }
 
-    parser -> currentCmd[i] = '\0';
+    // strip white space
+    i = 0;
+    m = 0;
+    while(next_line[i] != '\0') {
+        if(next_line[i] != ' ') {
+            parser -> currentCmd[m] = next_line[i];
+            m++;
+        }
+        i++
+    }
 
     return 1;
 }
@@ -164,9 +202,9 @@ int main(int argc, char* argv[]) {
             // get the next instruction
             advance(parser);
             // init mnemonics
-            char* d = NULL;
-            char* c = NULL;
-            char* j = NULL;
+            char* d = NULL; // destination mnemonic
+            char* c = NULL; // computation mnemonic
+            char* j = NULL; // jump mnemonic
 
             if(commandType(parser -> currentCmd) == C_COMMAND) {
                 dest(parser);

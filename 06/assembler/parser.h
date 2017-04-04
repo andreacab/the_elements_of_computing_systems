@@ -5,7 +5,7 @@ const int MAX_LINES = 100;
 const int MAX_LENGTH = 32;
 
 // Enums
-typedef enum {A_COMMAND, C_COMMAND, L_COMMAND} cmd_type;
+typedef enum {A_COMMAND, C_COMMAND, L_COMMAND, COMMENT, EMPTY_LINE} cmd_type;
 
 // Structures
 // Parser
