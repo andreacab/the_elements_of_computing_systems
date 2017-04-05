@@ -101,57 +101,80 @@ void jump(Parser* parser) {
     }
 }
 
-// TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
-int advance(Parser * parser) {
-    int i = 0, j = 0, c = getc(parser -> program);
-    char next_line[MAX_LENGTH];
+char* getLine(Parser * parser) {
+    int i = 0;
+    char c;
+    char* line;
 
-    // get line
-    do {
-        if(c == EOF) {
-            parser -> ended = 1;
-            i++;
+    while((c = getc(parser -> program)) != '\n') {
+      line[i] == c;
+      i++;
+    }
+    return line;
+}
+
+int isCommand(char * line) {
+    if(line[0] == '\n') {
+        return 0;
+    }
+    if(line[0] == '/' && line[1] == '/') {
+        return 0;
+    }
+    
+    return 1;
+}
+
+char* strip(char * line) {
+    int i = 0;
+    int j = 0;
+    char* stripped;
+ 
+    while(1) {
+        if(line[i] == '\0') {
             break;
         }
-
-        next_line[i] = c;
+        if(line[i] != ' ' && line[i] != '/' && line[i + 1] != '/') {
+            stripped[j] = line[i];
+            j++;
+        }
         i++;
-        c = getc(parser -> program)
-    } while(c != '\n')
-
-
-    for(;j < i, j++) {
-        if(j != 0) {
-            // check for comment not at beginning of line
-            if(next_line[j] == '/' && next_line[j + 1] == '/') {
-                next_line[j] = '\0';
-                break;
-            }
-        } else {
-            // check for empty lines or comment at beginning of line
-            if(next_line[j] == '\n' || (next_line[j] == '/' && next_line[j + 1] == '/')) {
-                advance(parser)
-                break;
-            }
-        }
-
-        // add null char to set end of string
-        if(j == i - 1) {
-            next_line[j + 1] = '\0';
-        }
     }
+ 
+    return stripped;
+}
 
-    // strip white space
-    i = 0;
-    m = 0;
-    while(next_line[i] != '\0') {
-        if(next_line[i] != ' ') {
-            parser -> currentCmd[m] = next_line[i];
-            m++;
+void copyCommand(char* cmd, char* parserCmd) {
+    int i = 0;
+ 
+    while(1) {
+        parserCmd[i] = cmd[i];
+        if(cmd[i] == '\0') {
+            break;
         }
-        i++
+        i++;
     }
+}
 
+int end(char* line) {
+}
+
+// TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
+int advance(Parser * parser) {
+    char* line = getLine(parser);
+    char* cmd = NULL;
+
+    while(!isCommand(line)) {
+      line = getLine(parser);
+      
+      if(end(line)) {
+        parser -> ended = 1;
+        break;
+      }
+    }
+    
+    cmd = strip(line);
+    copyCommand(cmd, parser -> currentCmd);
+ 
     return 1;
 }
 
