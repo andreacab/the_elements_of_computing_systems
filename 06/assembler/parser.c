@@ -107,9 +107,14 @@ char* getLine(Parser * parser) {
     char* line;
 
     while((c = getc(parser -> program)) != '\n') {
-      line[i] == c;
+      c = getc(parser -> program);
+      line[i] = c;
       i++;
+      if(c == '\n') {
+          break;
+      }
     }
+
     return line;
 }
 
@@ -120,7 +125,7 @@ int isCommand(char * line) {
     if(line[0] == '/' && line[1] == '/') {
         return 0;
     }
-    
+
     return 1;
 }
 
@@ -128,7 +133,7 @@ char* strip(char * line) {
     int i = 0;
     int j = 0;
     char* stripped;
- 
+
     while(1) {
         if(line[i] == '\0') {
             break;
@@ -139,13 +144,13 @@ char* strip(char * line) {
         }
         i++;
     }
- 
+
     return stripped;
 }
 
-void copyCommand(char* cmd, char* parserCmd) {
+void copy(char* cmd, char* parserCmd) {
     int i = 0;
- 
+
     while(1) {
         parserCmd[i] = cmd[i];
         if(cmd[i] == '\0') {
@@ -156,6 +161,16 @@ void copyCommand(char* cmd, char* parserCmd) {
 }
 
 int end(char* line) {
+    int i = 0;
+    while(1) {
+        if(line[i] == EOF) {
+            return 1;
+        } else if(line[i] == '\n') {
+            break;
+        }
+        i++;
+    }
+    return 0;
 }
 
 // TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
@@ -165,16 +180,15 @@ int advance(Parser * parser) {
 
     while(!isCommand(line)) {
       line = getLine(parser);
-      
-      if(end(line)) {
-        parser -> ended = 1;
-        break;
-      }
     }
-    
+
+    if(end(line)) {
+        parser -> ended = 1;
+    }
+
     cmd = strip(line);
-    copyCommand(cmd, parser -> currentCmd);
- 
+    copy(cmd, parser -> currentCmd);
+
     return 1;
 }
 
@@ -210,6 +224,7 @@ int main(int argc, char* argv[]) {
 
     // Exit if not assembly program provided
     if (argc < 2) {
+        printf("Expected a filepath to be passed but got none\n");
         return EXIT_FAILURE;
     }
     printf("file path is: %s\n", argv[1]);
@@ -222,6 +237,7 @@ int main(int argc, char* argv[]) {
         printf("start parsing!\n");
 
         while(hasMoreCommands(parser)) {
+            printf("hello\n");
             // get the next instruction
             advance(parser);
             // init mnemonics

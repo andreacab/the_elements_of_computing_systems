@@ -1,6 +1,4 @@
-
 D;JGT
 //hello this is a comment
-       M=1
-
+M=1
 @HELLLO
