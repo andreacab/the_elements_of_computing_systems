@@ -5,6 +5,11 @@
 
 void concatenate(int, char[][MAX_LENGTH], char[], char[], char[]);
 void printInstructions(char[][MAX_LENGTH], int);
+void getLine(Parser *, char *);
+int isCommand(char *);
+void strip(char *);
+void copy(char*, char*);
+int end(char *);
 
 Parser * initialize(char * fileName) {
     FILE * program = fopen(fileName, "r");
@@ -101,21 +106,18 @@ void jump(Parser* parser) {
     }
 }
 
-char* getLine(Parser * parser) {
+void getLine(Parser *parser, char *line) {
     int i = 0;
     char c;
-    char* line;
 
     while((c = getc(parser -> program)) != '\n') {
-      c = getc(parser -> program);
-      line[i] = c;
+      *(line + i) = c;
       i++;
       if(c == '\n') {
           break;
       }
     }
-
-    return line;
+    *(line + i) = '\0';
 }
 
 int isCommand(char * line) {
@@ -129,31 +131,28 @@ int isCommand(char * line) {
     return 1;
 }
 
-char* strip(char * line) {
+void strip(char *line) {
     int i = 0;
     int j = 0;
-    char* stripped;
 
     while(1) {
         if(line[i] == '\0') {
             break;
         }
         if(line[i] != ' ' && line[i] != '/' && line[i + 1] != '/') {
-            stripped[j] = line[i];
+            line[j] = line[i];
             j++;
         }
         i++;
     }
-
-    return stripped;
 }
 
-void copy(char* cmd, char* parserCmd) {
+void copy(char* line, char* parserCmd) {
     int i = 0;
 
     while(1) {
-        parserCmd[i] = cmd[i];
-        if(cmd[i] == '\0') {
+        parserCmd[i] = line[i];
+        if(line[i] == '\0') {
             break;
         }
         i++;
@@ -175,19 +174,23 @@ int end(char* line) {
 
 // TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
 int advance(Parser * parser) {
-    char* line = getLine(parser);
-    char* cmd = NULL;
-
+    char *line = (char *)malloc(MAX_LENGTH * sizeof(char));
+    
+    getLine(parser, line);
     while(!isCommand(line)) {
-      line = getLine(parser);
+      getLine(parser, line);
     }
 
+    printf("current line is %s\n", line);
     if(end(line)) {
         parser -> ended = 1;
     }
-
-    cmd = strip(line);
-    copy(cmd, parser -> currentCmd);
+    
+    strip(line);
+    
+    copy(line, parser -> currentCmd);
+    
+    free(line);
 
     return 1;
 }
@@ -237,7 +240,6 @@ int main(int argc, char* argv[]) {
         printf("start parsing!\n");
 
         while(hasMoreCommands(parser)) {
-            printf("hello\n");
             // get the next instruction
             advance(parser);
             // init mnemonics
