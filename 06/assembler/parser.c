@@ -111,17 +111,18 @@ void getLine(Parser *parser, char *line) {
     char c;
 
     while((c = getc(parser -> program)) != '\n') {
-      *(line + i) = c;
-      i++;
-      if(c == '\n') {
-          break;
-      }
+        printf("char is: %c\n", c);
+        *(line + i) = c;
+        i++;
+        if(c == EOF) {
+            break;
+        }
     }
     *(line + i) = '\0';
 }
 
 int isCommand(char * line) {
-    if(line[0] == '\n') {
+    if(line[0] == '\0') {
         return 0;
     }
     if(line[0] == '/' && line[1] == '/') {
@@ -134,14 +135,19 @@ int isCommand(char * line) {
 void strip(char *line) {
     int i = 0;
     int j = 0;
+    int isComment = 0;
 
     while(1) {
-        if(line[i] == '\0') {
-            break;
+        if(line[i] == '/' && line[i + 1] == '/') {
+            isComment = 1;
         }
-        if(line[i] != ' ' && line[i] != '/' && line[i + 1] != '/') {
+        if(!isComment && line[i] != ' ' && line[i] != EOF) {
             line[j] = line[i];
             j++;
+        }
+        if(line[i] == '\0') {
+            line[j] = '\0';
+            break;
         }
         i++;
     }
@@ -164,7 +170,7 @@ int end(char* line) {
     while(1) {
         if(line[i] == EOF) {
             return 1;
-        } else if(line[i] == '\n') {
+        } else if(line[i] == '\0') {
             break;
         }
         i++;
@@ -173,26 +179,26 @@ int end(char* line) {
 }
 
 // TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
-int advance(Parser * parser) {
+void advance(Parser * parser) {
     char *line = (char *)malloc(MAX_LENGTH * sizeof(char));
     
     getLine(parser, line);
+    printf("line is: %s\n", line);
     while(!isCommand(line)) {
       getLine(parser, line);
+      printf("line is: %s\n", line);
     }
 
-    printf("current line is %s\n", line);
     if(end(line)) {
+        printf("ENDED: %s\n", line);
         parser -> ended = 1;
     }
-    
+
     strip(line);
     
     copy(line, parser -> currentCmd);
     
     free(line);
-
-    return 1;
 }
 
 void concatenate(int num, char buffer[][MAX_LENGTH], char comp[], char dest[], char jump[]) {
@@ -238,8 +244,10 @@ int main(int argc, char* argv[]) {
     // Parsing
     if(parser -> program) {
         printf("start parsing!\n");
-
+        int i = 0;
         while(hasMoreCommands(parser)) {
+            printf("*** CMD %d\n", i);
+            i++;
             // get the next instruction
             advance(parser);
             // init mnemonics
