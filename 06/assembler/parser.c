@@ -111,7 +111,6 @@ void getLine(Parser *parser, char *line) {
     char c;
 
     while((c = getc(parser -> program)) != '\n') {
-        printf("char is: %c\n", c);
         *(line + i) = c;
         i++;
         if(c == EOF) {
@@ -179,26 +178,25 @@ int end(char* line) {
 }
 
 // TODO: change algorithm, get a line, stop, analyze it, decide if you it becomes currentCmd. If not get next line
-void advance(Parser * parser) {
+int advance(Parser * parser) {
     char *line = (char *)malloc(MAX_LENGTH * sizeof(char));
-    
+    int ended = 0;
+
     getLine(parser, line);
-    printf("line is: %s\n", line);
     while(!isCommand(line)) {
       getLine(parser, line);
-      printf("line is: %s\n", line);
     }
 
     if(end(line)) {
-        printf("ENDED: %s\n", line);
-        parser -> ended = 1;
+        ended = 1;
     }
 
     strip(line);
-    
+
     copy(line, parser -> currentCmd);
-    
+
     free(line);
+    return ended;
 }
 
 void concatenate(int num, char buffer[][MAX_LENGTH], char comp[], char dest[], char jump[]) {
@@ -245,11 +243,16 @@ int main(int argc, char* argv[]) {
     if(parser -> program) {
         printf("start parsing!\n");
         int i = 0;
+        int end = 0;
+        
         while(hasMoreCommands(parser)) {
-            printf("*** CMD %d\n", i);
             i++;
             // get the next instruction
-            advance(parser);
+            end = advance(parser);
+
+            if(end) {
+                break;
+            }
             // init mnemonics
             char* d = NULL; // destination mnemonic
             char* c = NULL; // computation mnemonic

@@ -26,7 +26,7 @@ void parse();
 
 int hasMoreCommands();
 
-void advance(Parser*);
+int advance(Parser*);
 
 cmd_type commandType();
 
