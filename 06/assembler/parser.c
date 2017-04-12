@@ -140,7 +140,7 @@ void strip(char *line) {
         if(line[i] == '/' && line[i + 1] == '/') {
             isComment = 1;
         }
-        if(!isComment && line[i] != ' ' && line[i] != EOF) {
+        if(!isComment && line[i] != ' ') {
             line[j] = line[i];
             j++;
         }
@@ -183,19 +183,20 @@ int advance(Parser * parser) {
     int ended = 0;
 
     getLine(parser, line);
+    strip(line);
     while(!isCommand(line)) {
       getLine(parser, line);
+      strip(line);
     }
 
     if(end(line)) {
         ended = 1;
     }
 
-    strip(line);
-
     copy(line, parser -> currentCmd);
 
     free(line);
+
     return ended;
 }
 
