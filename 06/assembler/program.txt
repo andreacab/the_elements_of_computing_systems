@@ -1,19 +1,7 @@
 D;JGT
 //hello this is a comment
 M=1
-
-
-
-
-D;JGT       // some comment
-
-
-
-        // some more comment
-
-
-
-
-
-
-M=9
+D;JGT // some comment
+            // some more comment
+@456
+  M=9

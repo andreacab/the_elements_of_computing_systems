@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "code.h"
+#include "symbol.h"
 
 void concatenate(int, char[][MAX_LENGTH], char[], char[], char[]);
 void printInstructions(char[][MAX_LENGTH], int);
@@ -28,7 +29,7 @@ Parser * initialize(char * fileName) {
     return parser;
 }
 
-int hasMoreCommands(Parser * parser) {
+int hasMoreCommands(Parser *parser) {
     return !parser -> ended;
 }
 
@@ -43,9 +44,26 @@ cmd_type commandType(char cmd[]) {
 }
 
 // TODO: implements symbol()
-// char* symbol() {
+void symbol(Parser *parser) {
+    int i = 0;
+    int j = 0;
+    int copy = 0;
 
-// }
+    while(1) {
+        if(copy == 1) {
+            *((parser -> sym) + j) = *((parser -> currentCmd) + i);
+            j++;
+        }
+
+        if(*((parser -> currentCmd) + i) == '@') {
+            copy = 1;
+        } else if(*((parser -> currentCmd) + i) == '\0') {
+            break;
+        }
+
+        i++;
+    }
+}
 
 void dest(Parser* parser) {
     int i;
@@ -258,7 +276,8 @@ int main(int argc, char* argv[]) {
             char* d = NULL; // destination mnemonic
             char* c = NULL; // computation mnemonic
             char* j = NULL; // jump mnemonic
-
+            char* s = NULL; // symbol number
+            
             if(commandType(parser -> currentCmd) == C_COMMAND) {
                 dest(parser);
                 d = destToBinary(parser -> dest); // 4 bytes ('\0' included)
@@ -272,6 +291,8 @@ int main(int argc, char* argv[]) {
             } else if(commandType(parser -> currentCmd) == A_COMMAND ||
                 commandType(parser -> currentCmd) == L_COMMAND) {
                 printf("this is a A_COMMAND or L_COMMAND\n");
+                symbol(parser);
+                s = symbolToBinary(parser -> sym);
             }
 
             // Logging
@@ -279,6 +300,7 @@ int main(int argc, char* argv[]) {
             printf("dest: %s, in binary: %s\n", parser -> dest, d);
             printf("comp: %s, in binray: %s\n", parser -> comp, c);
             printf("jump: %s, in binary: %s\n", parser -> jump, j);
+            printf("symbol: %s, in binary: %s\n", parser -> sym, s);
             printf("----------------------------------------------------\n");
 
             // increment program counter
